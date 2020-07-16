@@ -92,7 +92,7 @@ TEST(ast, should_able_to_parse_the_func_call) {
   tu.pop_front();
   tu.front()->accept(visitor);
   auto inst = visitor->collect();
-  ASSERT_THAT(inst.size(), testing::Eq(2));
+  ASSERT_THAT(inst.size(), testing::Eq(3));
   inst.pop_front();
   llvm::Value **v = inst.front().get();
   ASSERT_TRUE(llvm::isa<llvm::CallInst>(**v));
@@ -118,7 +118,7 @@ TEST(ast, should_able_to_parse_the_double_parameter_func_call) {
   tu.pop_front();
   tu.front()->accept(visitor);
   auto inst = visitor->collect();
-  ASSERT_THAT(inst.size(), testing::Eq(2));
+  ASSERT_THAT(inst.size(), testing::Eq(4));
   inst.pop_front();
   llvm::Value **v = inst.front().get();
   ASSERT_TRUE(llvm::isa<llvm::CallInst>(**v));

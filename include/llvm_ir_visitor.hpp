@@ -17,7 +17,10 @@
 #include <llvm/IR/Verifier.h>
 #include <memory>
 
-class llvm_ir_visitor : public ir_visitor, public collector {
+class llvm_ir_visitor : public ir_visitor,
+                        public collector,
+                        public std::enable_shared_from_this<llvm_ir_visitor>
+{
 public:
   llvm_ir_visitor() : Builder(TheContext), NamedValues() {
     TheModule = std::make_unique<llvm::Module>("my cool jit", TheContext);
@@ -65,7 +68,7 @@ public:
     values.push_back(std::make_shared<llvm::Value *>(V));
   }
   virtual void visit(ast::number *n) {
-    auto v = llvm::ConstantFP::get(TheContext, llvm::APFloat((float)n->v()));
+    auto v = llvm::ConstantFP::get(TheContext, llvm::APFloat((double)n->v()));
     values.push_back(std::make_shared<llvm::Value *>(v));
   }
   virtual void visit(ast::type *) {}
@@ -102,11 +105,9 @@ public:
       return;
 
     std::vector<llvm::Value *> ArgsV;
-    for (auto &arg : Args) {
-      auto visitor = std::make_shared<llvm_ir_visitor>();
-      arg.get().accept(visitor);
-      auto exprs = visitor->collect();
-      auto r = exprs.front().get();
+    for (ast::node& arg : Args) {
+      arg.accept(shared_from_this());
+      auto r = shared_from_this()->collect().back().get();
       ArgsV.push_back(*r);
     }
 
